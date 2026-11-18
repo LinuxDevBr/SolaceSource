@@ -1775,15 +1775,8 @@ function Solace.ValidateKeySystem(keyConfig)
 		IgnoreGuiInset = true,
 		ZIndexBehavior = Enum.ZIndexBehavior.Global,
 	})
-	local overlay = Solace.Instance("Frame", {
-		Parent = keyGui,
-		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = Solace.MainFrameColor,
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-	})
 	local panel = Solace.Instance("Frame", {
-		Parent = overlay,
+		Parent = keyGui,
 		Size = UDim2.new(0, 420, 0, 260),
 		Position = UDim2.fromScale(0.5, 0.5),
 		AnchorPoint = Vector2.new(0.5, 0.5),
