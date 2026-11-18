@@ -1823,11 +1823,20 @@ function Solace.ValidateKeySystem(keyConfig)
 			ColorSequenceKeypoint.new(1, accentShade(Solace.AccentColor)),
 		}),
 	})
+	Solace.Instance("ImageLabel", {
+		Parent = inputFrame,
+		BackgroundTransparency = 1,
+		Size = UDim2.new(0, 16, 0, 16),
+		Position = UDim2.new(0, 6, 0.5, -8),
+		Image = LucideIcons["key"],
+		ImageColor3 = Color3.fromRGB(255, 255, 255),
+		ZIndex = 5,
+	})
 	local input = Solace.Instance("TextBox", {
 		Parent = inputFrame,
 		BackgroundTransparency = 1,
-		Size = UDim2.new(1, -14, 1, -6),
-		Position = UDim2.new(0, 7, 0, 3),
+		Size = UDim2.new(1, -38, 1, -6),
+		Position = UDim2.new(0, 30, 0, 3),
 		FontFace = Solace.CustomFont,
 		Text = "",
 		PlaceholderText = "Enter your key",
