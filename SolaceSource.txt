@@ -1779,7 +1779,7 @@ function Solace.ValidateKeySystem(keyConfig)
 		Parent = keyGui,
 		Size = UDim2.fromScale(1, 1),
 		BackgroundColor3 = Solace.MainFrameColor,
-		BackgroundTransparency = Solace.UITransparency,
+		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 	})
 	local panel = Solace.Instance("Frame", {
