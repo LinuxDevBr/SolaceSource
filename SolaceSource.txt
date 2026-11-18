@@ -1795,7 +1795,7 @@ function Solace.ValidateKeySystem(keyConfig)
 	local note = Solace.Instance("TextLabel", { Parent = panel, Size = UDim2.new(1, 0, 0, 42), BackgroundTransparency = 1, FontFace = Solace.CustomFont, Text = keyConfig.Note or "Enter your key to continue.", TextColor3 = Color3.fromRGB(185, 185, 185), TextSize = 14, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 2 })
 	local inputFrame = Solace.Instance("Frame", {
 		Parent = panel,
-		BackgroundColor3 = Solace.MainFrameColor,
+		BackgroundColor3 = Solace.FrameColor,
 		BackgroundTransparency = 0.45,
 		BorderSizePixel = 0,
 		Size = UDim2.new(1, 0, 0, 34),
