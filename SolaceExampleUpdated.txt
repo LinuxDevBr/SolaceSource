@@ -2,12 +2,102 @@ repeat
 	task.wait()
 until game:IsLoaded()
 
-local Solace = loadstring(game:HttpGet("https://raw.githubusercontent.com/LinuxDevBr/jubilant-octo-broccoli/refs/heads/main/Solace%20Source.txt"))()
+local Solace = loadstring(game:HttpGet("https://raw.githubusercontent.com/LinuxDevBr/SolaceSource/7f8aac5/SolaceSourceV2.txt"))()
 
 Solace.Debug = {
 	Enabled = true,
 	Users = { 7076822081 },
 }
+
+local KeySystemLocal = {
+	Enabled = true,
+	Title = "Solace Access",
+	Note = "Enter your key to continue.",
+	SaveKey = true,
+	Folder = "SolaceUI/Keys",
+	URL = "https://your-key-link.com",
+	Key = {
+		"1234",
+		"5678",
+	},
+}
+
+local KeySystemKeyValidator = {
+	Enabled = true,
+	Title = "Solace Access",
+	Note = "Enter your key to continue.",
+	SaveKey = true,
+	Folder = "SolaceUI/Keys",
+	URL = "https://your-key-link.com",
+	KeyValidator = function(key)
+		if key == "1234" then
+			return true, "Key validated."
+		end
+		return false, "Invalid key."
+	end,
+}
+
+local KeySystemPlatoboost = {
+	Enabled = true,
+	Title = "Solace Access",
+	Note = "Enter your key to continue.",
+	SaveKey = true,
+	Folder = "SolaceUI/Keys",
+	URL = "https://your-key-link.com",
+	Provider = {
+		Type = "platoboost",
+		Name = "platoboost",
+		ServiceId = 1234,
+		Service = 1234,
+		Secret = "your-platoboost-secret",
+		Identifier = 123456789,
+		Host = "https://api.platoboost.app",
+	},
+}
+
+local KeySystemCustomProvider = {
+	Enabled = true,
+	Title = "Solace Access",
+	Note = "Enter your key to continue.",
+	SaveKey = true,
+	Folder = "SolaceUI/Keys",
+	URL = "https://your-key-link.com",
+	Providers = {
+		{
+			Verify = function(key)
+				if key == "1234" then
+					return true, "Key validated."
+				end
+				return false, "Invalid key."
+			end,
+			Copy = function()
+				if setclipboard then
+					setclipboard("https://your-key-link.com")
+					return true
+				end
+				return false
+			end,
+		},
+	},
+}
+
+local KeySystemAPI = {
+	Enabled = true,
+	Title = "Solace Access",
+	Note = "Enter your key to continue.",
+	SaveKey = true,
+	Folder = "SolaceUI/Keys",
+	URL = "https://your-key-link.com",
+	API = {
+		{
+			Type = "platoboost",
+			ServiceId = 1234,
+			Secret = "your-platoboost-secret",
+		},
+	},
+}
+
+local ActiveKeySystem = KeySystemLocal
 
 local UI = Solace.Create({
 	Title = "Solace",
@@ -23,17 +113,7 @@ local UI = Solace.Create({
 		Transparency = 0.85,
 	},
 	AccentColor = Color3.fromRGB(0, 120, 212),
-	KeySystem = {
-		Enabled = true,
-		Title = "Solace Access",
-		Key = {
-			"1234",
-			"5678",
-		},
-		Note = "Enter your key to continue.",
-		SaveKey = true,
-		URL = "https://your-key-link.com",
-	},
+	KeySystem = ActiveKeySystem,
 })
 
 local SettingsTab = UI.Tab({
