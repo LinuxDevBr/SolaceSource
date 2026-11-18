@@ -1845,7 +1845,7 @@ function Solace.ValidateKeySystem(keyConfig)
 		TextSize = 12,
 		TextScaled = false,
 		TextTruncate = Enum.TextTruncate.AtEnd,
-		TextXAlignment = Enum.TextXAlignment.Center,
+		TextXAlignment = Enum.TextXAlignment.Left,
 		ClearTextOnFocus = false,
 		ClipsDescendants = true,
 		ZIndex = 4,
