@@ -1793,9 +1793,54 @@ function Solace.ValidateKeySystem(keyConfig)
 	local layout = Solace.Instance("UIListLayout", { Parent = panel, Padding = UDim.new(0, 12), HorizontalAlignment = Enum.HorizontalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder })
 	local title = Solace.Instance("TextLabel", { Parent = panel, Size = UDim2.new(1, 0, 0, 28), BackgroundTransparency = 1, FontFace = Solace.CustomFontBold, Text = tostring(keyTitle), TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 21, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 1 })
 	local note = Solace.Instance("TextLabel", { Parent = panel, Size = UDim2.new(1, 0, 0, 42), BackgroundTransparency = 1, FontFace = Solace.CustomFont, Text = keyConfig.Note or "Enter your key to continue.", TextColor3 = Color3.fromRGB(185, 185, 185), TextSize = 14, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 2 })
-	local input = Solace.Instance("TextBox", { Parent = panel, Size = UDim2.new(1, 0, 0, 38), BackgroundColor3 = Solace.MainFrameColor, BackgroundTransparency = 0.08, BorderSizePixel = 0, ClearTextOnFocus = false, FontFace = Solace.CustomFont, PlaceholderText = "Enter your key", PlaceholderColor3 = Color3.fromRGB(140, 140, 140), Text = "", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 14, LayoutOrder = 3 })
-	Solace.Instance("UICorner", { Parent = input, CornerRadius = UDim.new(0, 7) })
-	Solace.Instance("UIPadding", { Parent = input, PaddingLeft = UDim.new(0, 12), PaddingRight = UDim.new(0, 12) })
+	local inputFrame = Solace.Instance("Frame", {
+		Parent = panel,
+		BackgroundColor3 = Solace.FrameColor,
+		BackgroundTransparency = 0.55,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, 0, 0, 34),
+		ZIndex = 3,
+		LayoutOrder = 3,
+	})
+	Solace.Instance("UICorner", {
+		Parent = inputFrame,
+		CornerRadius = UDim.new(0, 8),
+	})
+	local inputAccentBar = Solace.Instance("Frame", {
+		Parent = inputFrame,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundTransparency = 0.3,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, -8, 0, 2),
+		Position = UDim2.new(0, 4, 1, -4),
+		ZIndex = 4,
+	})
+	Solace.Instance("UIGradient", {
+		Parent = inputAccentBar,
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, accentShade(Solace.AccentColor)),
+			ColorSequenceKeypoint.new(0.5, Solace.AccentColor),
+			ColorSequenceKeypoint.new(1, accentShade(Solace.AccentColor)),
+		}),
+	})
+	local input = Solace.Instance("TextBox", {
+		Parent = inputFrame,
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, -14, 1, -6),
+		Position = UDim2.new(0, 7, 0, 3),
+		FontFace = Solace.CustomFont,
+		Text = "",
+		PlaceholderText = "Enter your key",
+		PlaceholderColor3 = Color3.fromRGB(160, 160, 160),
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextSize = 12,
+		TextScaled = false,
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		ClearTextOnFocus = false,
+		ClipsDescendants = true,
+		ZIndex = 4,
+	})
 	local status = Solace.Instance("TextLabel", { Parent = panel, Size = UDim2.new(1, 0, 0, 28), BackgroundTransparency = 1, FontFace = Solace.CustomFont, Text = "", TextColor3 = Color3.fromRGB(255, 130, 130), TextSize = 13, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 4 })
 	local actions = Solace.Instance("Frame", { Parent = panel, Size = UDim2.new(1, 0, 0, 36), BackgroundTransparency = 1, LayoutOrder = 5 })
 	local getButton = Solace.Instance("TextButton", { Parent = actions, Size = UDim2.new(0.48, 0, 1, 0), BackgroundColor3 = Solace.AccentColor, BackgroundTransparency = 0.14, BorderSizePixel = 0, FontFace = Solace.CustomFont, Text = "Get key", TextColor3 = Color3.fromRGB(230, 230, 230), TextSize = 14, AutoButtonColor = true })
