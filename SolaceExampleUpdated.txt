@@ -1,0 +1,138 @@
+repeat
+	task.wait()
+until game:IsLoaded()
+
+local Solace = loadstring(game:HttpGet("https://raw.githubusercontent.com/LinuxDevBr/jubilant-octo-broccoli/refs/heads/main/Solace%20Source.txt"))()
+
+Solace.Debug = {
+	Enabled = true,
+	Users = { 7076822081 },
+}
+
+local UI = Solace.Create({
+	Title = "Solace",
+	Subtitle = "Solace",
+	TabWidth = 185,
+	ConfigFolder = "SolaceUI",
+	Font = {
+		Regular = "BuilderSansMedium",
+		Bold = "BuilderSansBold",
+	},
+	Background = {
+		Image = "rbxassetid://",
+		Transparency = 0.85,
+	},
+	AccentColor = Color3.fromRGB(0, 120, 212),
+	KeySystem = {
+		Enabled = true,
+		Key = {
+			"1234",
+			"5678",
+		},
+		Note = "Enter your key to continue.",
+		SaveKey = true,
+		URL = "https://your-key-link.com",
+	},
+})
+
+local SettingsTab = UI.Tab({
+	Name = "Settings",
+	Icon = "",
+	Default = false,
+})
+
+local OneTab = UI.Tab({
+	Name = "Tab 1",
+	Icon = "",
+	Default = true,
+})
+
+OneTab.Section({
+	Name = "Section",
+	Icon = "",
+})
+
+OneTab.Toggle({
+	Name = "Toggle",
+	Description = "",
+	Default = false,
+	Callback = function(state) end,
+})
+
+OneTab.Slider({
+	Name = "Slider",
+	Description = "",
+	Min = 0,
+	Max = 300,
+	Default = 150,
+	Rounding = 0,
+	Suffix = "",
+	Callback = function(value) end,
+})
+
+OneTab.Dropdown({
+	Name = "Dropdown",
+	Description = "",
+	Options = { "Option A", "Option B", "Option C" },
+	Multi = false,
+	Default = "Option A",
+	Callback = function(selectedOption) end,
+})
+
+OneTab.Button({
+	Name = "Button",
+	Description = "",
+	Callback = function() end,
+})
+
+OneTab.Button({
+	Name = "Button 2",
+	Description = "",
+	CollapseEnable = true,
+	CollapseCount = 2,
+	CollapseDefault = true,
+	Callback = function() end,
+})
+
+OneTab.Input({
+	Name = "Input",
+	Description = "",
+	Numeric = false,
+	Placeholder = "Type here",
+	Default = "",
+	Finished = false,
+	Icon = "search",
+	IconColor = Color3.fromRGB(160, 160, 160),
+	Callback = function(text) end,
+})
+
+OneTab.Checkbox({
+	Name = "Checkbox",
+	Description = "",
+	Default = false,
+	Callback = function(state) end,
+})
+
+OneTab.Keybind({
+	Name = "Keybind",
+	Description = "",
+	Default = "E",
+	Hold = false,
+	Callback = function(key) end,
+})
+
+OneTab.Label({
+	Name = "Label",
+})
+
+OneTab.Paragraph({
+	Title = "Paragraph",
+	Content = "Content.",
+	FormatText = true,
+})
+
+Solace:Notify({
+	Title = "Title",
+	Content = "Content",
+	Duration = 5,
+})
