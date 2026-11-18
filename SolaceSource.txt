@@ -1270,8 +1270,7 @@ function Solace.SaveConfig(name)
 	end
 	if name:match("[^%w%s_-]") then
 		print("Cannot save config: Invalid characters in name")
-		return false,
-			"Config name contains invalid characters. Use only letters, numbers, spaces, underscores and hyphens"
+		return false, "Config name contains invalid characters. Use only letters, numbers, spaces, underscores and hyphens"
 	end
 
 	local configData = {
@@ -1454,12 +1453,8 @@ function Solace.RepositionNotifications()
 				end
 			end
 
-			local targetPosition = UDim2.new(
-				1,
-				-notificationData.Frame.Size.X.Offset - 15,
-				1,
-				-yOffset - notificationData.Frame.Size.Y.Offset
-			)
+			local targetPosition =
+				UDim2.new(1, -notificationData.Frame.Size.X.Offset - 15, 1, -yOffset - notificationData.Frame.Size.Y.Offset)
 			local tweenInfo = TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
 			local tween = TweenService:Create(notificationData.Frame, tweenInfo, {
@@ -1617,12 +1612,7 @@ function Solace:Notify(config)
 		if not _isDestroyed then
 			local exitTweenInfo = TweenInfo.new(0.16, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
 			local exitTween = TweenService:Create(Notification, exitTweenInfo, {
-				Position = UDim2.new(
-					1,
-					notificationWidth + 20,
-					Notification.Position.Y.Scale,
-					Notification.Position.Y.Offset
-				),
+				Position = UDim2.new(1, notificationWidth + 20, Notification.Position.Y.Scale, Notification.Position.Y.Offset),
 			})
 			_trackTween(exitTween)
 			exitTween:Play()
@@ -1934,10 +1924,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 	local startPos = Vector2.zero
 
 	_trackConnection(ResizeHandle.InputBegan:Connect(function(input)
-		if
-			input.UserInputType == Enum.UserInputType.MouseButton1
-			or input.UserInputType == Enum.UserInputType.Touch
-		then
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			isResizing = true
 			startSize = Main.Size
 			startPos = Vector2.new(input.Position.X, input.Position.Y)
@@ -1957,10 +1944,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 	_trackConnection(UserInputService.InputChanged:Connect(function(input)
 		if
 			isResizing
-			and (
-				input.UserInputType == Enum.UserInputType.MouseMovement
-				or input.UserInputType == Enum.UserInputType.Touch
-			)
+			and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch)
 		then
 			if Solace.CurrentActiveSlider or Solace.CurrentActiveColorSlider then
 				return
@@ -1986,10 +1970,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 
 	local function setupDragHandlers(frame)
 		_trackConnection(frame.InputBegan:Connect(function(input)
-			if
-				input.UserInputType == Enum.UserInputType.MouseButton1
-				or input.UserInputType == Enum.UserInputType.Touch
-			then
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 				isDraggingMain = true
 				dragStartMain = input.Position
 				startPosMain = Main.Position
@@ -2019,10 +2000,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 	_trackConnection(UserInputService.InputChanged:Connect(function(input)
 		if
 			isDraggingMain
-			and (
-				input.UserInputType == Enum.UserInputType.MouseMovement
-				or input.UserInputType == Enum.UserInputType.Touch
-			)
+			and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch)
 		then
 			local delta = input.Position - dragStartMain
 			Main.Position = UDim2.new(
@@ -2035,10 +2013,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 	end))
 
 	_trackConnection(UserInputService.InputEnded:Connect(function(input)
-		if
-			input.UserInputType == Enum.UserInputType.MouseButton1
-			or input.UserInputType == Enum.UserInputType.Touch
-		then
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			if isDraggingMain then
 				isDraggingMain = false
 			end
@@ -2139,11 +2114,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 		BackgroundTransparency = 0,
 		Size = UDim2.new(0, 32, 0, 32),
 		Position = UDim2.new(0, 10, 0.5, -16),
-		Image = Players:GetUserThumbnailAsync(
-			LocalPlayer.UserId,
-			Enum.ThumbnailType.HeadShot,
-			Enum.ThumbnailSize.Size48x48
-		),
+		Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48),
 		ImageColor3 = Color3.fromRGB(255, 255, 255),
 		ImageTransparency = 0,
 		ZIndex = 4,
@@ -2362,10 +2333,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 	end))
 
 	_trackConnection(SearchTextBox.InputBegan:Connect(function(input)
-		if
-			input.UserInputType == Enum.UserInputType.Touch
-			or input.UserInputType == Enum.UserInputType.MouseButton1
-		then
+		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 			SearchTextBox:CaptureFocus()
 		end
 	end))
@@ -2954,49 +2922,35 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			end
 
 			_trackConnection(Btn.MouseEnter:Connect(function()
-				local tween = TweenService:Create(
-					BtnFrame,
-					TweenInfo.new(0.26, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-					{
-						BackgroundTransparency = 0.48,
-					}
-				)
+				local tween = TweenService:Create(BtnFrame, TweenInfo.new(0.26, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					BackgroundTransparency = 0.48,
+				})
 				_trackTween(tween)
 				tween:Play()
 			end))
 
 			_trackConnection(Btn.MouseLeave:Connect(function()
-				local tween = TweenService:Create(
-					BtnFrame,
-					TweenInfo.new(0.26, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-					{
-						BackgroundTransparency = Solace.FrameTransparency,
-					}
-				)
+				local tween = TweenService:Create(BtnFrame, TweenInfo.new(0.26, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					BackgroundTransparency = Solace.FrameTransparency,
+				})
 				_trackTween(tween)
 				tween:Play()
 			end))
 
 			_trackConnection(Btn.MouseButton1Down:Connect(function()
-				local tween1 = TweenService:Create(
-					BtnFrame,
-					TweenInfo.new(0.14, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-					{
+				local tween1 =
+					TweenService:Create(BtnFrame, TweenInfo.new(0.14, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 						BackgroundTransparency = 0.28,
-					}
-				)
+					})
 				_trackTween(tween1)
 				tween1:Play()
 			end))
 
 			_trackConnection(Btn.MouseButton1Up:Connect(function()
-				local tween1 = TweenService:Create(
-					BtnFrame,
-					TweenInfo.new(0.14, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-					{
+				local tween1 =
+					TweenService:Create(BtnFrame, TweenInfo.new(0.14, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 						BackgroundTransparency = 0.48,
-					}
-				)
+					})
 				_trackTween(tween1)
 				tween1:Play()
 			end))
@@ -3009,13 +2963,10 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 				collapseCooldown = true
 				IsCollapsed = not IsCollapsed
 
-				local tween = TweenService:Create(
-					CollapseArrow,
-					TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-					{
+				local tween =
+					TweenService:Create(CollapseArrow, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 						Rotation = IsCollapsed and 0 or 90,
-					}
-				)
+					})
 				_trackTween(tween)
 				tween:Play()
 
@@ -3023,13 +2974,10 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 					if not IsCollapsed then
 						CollapseGradientLine.Visible = true
 						CollapseGradientLine.Size = UDim2.new(0, 0, 0, 2)
-						local gradientTween = TweenService:Create(
-							CollapseGradientLine,
-							TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-							{
+						local gradientTween =
+							TweenService:Create(CollapseGradientLine, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 								Size = UDim2.new(1, -10, 0, 2),
-							}
-						)
+							})
 						_trackTween(gradientTween)
 						gradientTween:Play()
 					else
@@ -3067,10 +3015,8 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 							element.Visible = false
 							element.Size = UDim2.new(1, 0, 0, 0)
 						elseif IsCollapsed then
-							local closeTween = TweenService:Create(
-								element,
-								TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
-								{
+							local closeTween =
+								TweenService:Create(element, TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
 									Position = UDim2.new(0, 0, 0, -15),
 									Size = UDim2.new(
 										element.Size.X.Scale,
@@ -3078,35 +3024,24 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 										element.Size.Y.Scale * 0.9,
 										element.Size.Y.Offset * 0.9
 									),
-								}
-							)
+								})
 							_trackTween(closeTween)
 							closeTween:Play()
 
 							closeTween.Completed:Once(function()
 								element.Visible = false
-								element.Size = UDim2.new(
-									element.Size.X.Scale,
-									element.Size.X.Offset,
-									element.Size.Y.Scale / 0.9,
-									element.Size.Y.Offset / 0.9
-								)
+								element.Size =
+									UDim2.new(element.Size.X.Scale, element.Size.X.Offset, element.Size.Y.Scale / 0.9, element.Size.Y.Offset / 0.9)
 								element.Position = UDim2.new(0, 0, 0, 0)
 							end)
 						else
 							element.Visible = true
 							element.Position = UDim2.new(0, 0, 0, -15)
-							element.Size = UDim2.new(
-								element.Size.X.Scale,
-								element.Size.X.Offset,
-								element.Size.Y.Scale * 0.9,
-								element.Size.Y.Offset * 0.9
-							)
+							element.Size =
+								UDim2.new(element.Size.X.Scale, element.Size.X.Offset, element.Size.Y.Scale * 0.9, element.Size.Y.Offset * 0.9)
 
-							local openTween = TweenService:Create(
-								element,
-								TweenInfo.new(0.32, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-								{
+							local openTween =
+								TweenService:Create(element, TweenInfo.new(0.32, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 									Position = UDim2.new(0, 0, 0, 0),
 									Size = UDim2.new(
 										element.Size.X.Scale,
@@ -3114,8 +3049,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 										element.Size.Y.Scale / 0.9,
 										element.Size.Y.Offset / 0.9
 									),
-								}
-							)
+								})
 							_trackTween(openTween)
 							openTween:Play()
 						end
@@ -3341,10 +3275,8 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 
 			_trackConnection(ToggleTrack.InputBegan:Connect(function(input)
 				if
-					(
-						input.UserInputType == Enum.UserInputType.Touch
-						or input.UserInputType == Enum.UserInputType.MouseButton1
-					) and input.UserInputState == Enum.UserInputState.Begin
+					(input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1)
+					and input.UserInputState == Enum.UserInputState.Begin
 				then
 					isDragToggle = true
 					dragStartToggle = input.Position
@@ -3358,10 +3290,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 					isDragToggle
 					and dragStartToggle
 					and activeToggleInput
-					and (
-						input.UserInputType == Enum.UserInputType.Touch
-						or input.UserInputType == Enum.UserInputType.MouseMovement
-					)
+					and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement)
 				then
 					local delta = input.Position - dragStartToggle
 					if math.abs(delta.X) > 5 or math.abs(delta.Y) > 5 then
@@ -3371,10 +3300,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			end))
 
 			_trackConnection(ToggleTrack.InputEnded:Connect(function(input)
-				if
-					input.UserInputType == Enum.UserInputType.Touch
-					or input.UserInputType == Enum.UserInputType.MouseButton1
-				then
+				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 					if isDragToggle and activeToggleInput == input then
 						isDragToggle = false
 						activeToggleInput = nil
@@ -3388,10 +3314,8 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 
 			_trackConnection(ToggleKnob.InputBegan:Connect(function(input)
 				if
-					(
-						input.UserInputType == Enum.UserInputType.Touch
-						or input.UserInputType == Enum.UserInputType.MouseButton1
-					) and input.UserInputState == Enum.UserInputState.Begin
+					(input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1)
+					and input.UserInputState == Enum.UserInputState.Begin
 				then
 					isDragToggle = true
 					dragStartToggle = input.Position
@@ -3405,10 +3329,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 					isDragToggle
 					and dragStartToggle
 					and activeToggleInput
-					and (
-						input.UserInputType == Enum.UserInputType.Touch
-						or input.UserInputType == Enum.UserInputType.MouseMovement
-					)
+					and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement)
 				then
 					local delta = input.Position - dragStartToggle
 					if math.abs(delta.X) > 5 or math.abs(delta.Y) > 5 then
@@ -3418,10 +3339,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			end))
 
 			_trackConnection(ToggleKnob.InputEnded:Connect(function(input)
-				if
-					input.UserInputType == Enum.UserInputType.Touch
-					or input.UserInputType == Enum.UserInputType.MouseButton1
-				then
+				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 					if isDragToggle and activeToggleInput == input then
 						isDragToggle = false
 						activeToggleInput = nil
@@ -3435,10 +3353,8 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 
 			_trackConnection(Toggle.InputBegan:Connect(function(input)
 				if
-					(
-						input.UserInputType == Enum.UserInputType.Touch
-						or input.UserInputType == Enum.UserInputType.MouseButton1
-					) and input.UserInputState == Enum.UserInputState.Begin
+					(input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1)
+					and input.UserInputState == Enum.UserInputState.Begin
 				then
 					isDragToggle = true
 					dragStartToggle = input.Position
@@ -3452,10 +3368,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 					isDragToggle
 					and dragStartToggle
 					and activeToggleInput
-					and (
-						input.UserInputType == Enum.UserInputType.Touch
-						or input.UserInputType == Enum.UserInputType.MouseMovement
-					)
+					and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement)
 				then
 					local delta = input.Position - dragStartToggle
 					if math.abs(delta.X) > 5 or math.abs(delta.Y) > 5 then
@@ -3465,10 +3378,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			end))
 
 			_trackConnection(Toggle.InputEnded:Connect(function(input)
-				if
-					input.UserInputType == Enum.UserInputType.Touch
-					or input.UserInputType == Enum.UserInputType.MouseButton1
-				then
+				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 					if isDragToggle and activeToggleInput == input then
 						isDragToggle = false
 						activeToggleInput = nil
@@ -3697,10 +3607,8 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 
 			_trackConnection(CheckboxBox.InputBegan:Connect(function(input)
 				if
-					(
-						input.UserInputType == Enum.UserInputType.Touch
-						or input.UserInputType == Enum.UserInputType.MouseButton1
-					) and input.UserInputState == Enum.UserInputState.Begin
+					(input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1)
+					and input.UserInputState == Enum.UserInputState.Begin
 				then
 					isDragCheck = true
 					dragStartCheck = input.Position
@@ -3714,10 +3622,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 					isDragCheck
 					and dragStartCheck
 					and activeCheckInput
-					and (
-						input.UserInputType == Enum.UserInputType.Touch
-						or input.UserInputType == Enum.UserInputType.MouseMovement
-					)
+					and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement)
 				then
 					local delta = input.Position - dragStartCheck
 					if math.abs(delta.X) > 5 or math.abs(delta.Y) > 5 then
@@ -3727,10 +3632,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			end))
 
 			_trackConnection(CheckboxBox.InputEnded:Connect(function(input)
-				if
-					input.UserInputType == Enum.UserInputType.Touch
-					or input.UserInputType == Enum.UserInputType.MouseButton1
-				then
+				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 					if isDragCheck and activeCheckInput == input then
 						isDragCheck = false
 						activeCheckInput = nil
@@ -3744,10 +3646,8 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 
 			_trackConnection(CheckIcon.InputBegan:Connect(function(input)
 				if
-					(
-						input.UserInputType == Enum.UserInputType.Touch
-						or input.UserInputType == Enum.UserInputType.MouseButton1
-					) and input.UserInputState == Enum.UserInputState.Begin
+					(input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1)
+					and input.UserInputState == Enum.UserInputState.Begin
 				then
 					isDragCheck = true
 					dragStartCheck = input.Position
@@ -3761,10 +3661,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 					isDragCheck
 					and dragStartCheck
 					and activeCheckInput
-					and (
-						input.UserInputType == Enum.UserInputType.Touch
-						or input.UserInputType == Enum.UserInputType.MouseMovement
-					)
+					and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement)
 				then
 					local delta = input.Position - dragStartCheck
 					if math.abs(delta.X) > 5 or math.abs(delta.Y) > 5 then
@@ -3774,10 +3671,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			end))
 
 			_trackConnection(CheckIcon.InputEnded:Connect(function(input)
-				if
-					input.UserInputType == Enum.UserInputType.Touch
-					or input.UserInputType == Enum.UserInputType.MouseButton1
-				then
+				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 					if isDragCheck and activeCheckInput == input then
 						isDragCheck = false
 						activeCheckInput = nil
@@ -3791,10 +3685,8 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 
 			_trackConnection(Checkbox.InputBegan:Connect(function(input)
 				if
-					(
-						input.UserInputType == Enum.UserInputType.Touch
-						or input.UserInputType == Enum.UserInputType.MouseButton1
-					) and input.UserInputState == Enum.UserInputState.Begin
+					(input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1)
+					and input.UserInputState == Enum.UserInputState.Begin
 				then
 					isDragCheck = true
 					dragStartCheck = input.Position
@@ -3808,10 +3700,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 					isDragCheck
 					and dragStartCheck
 					and activeCheckInput
-					and (
-						input.UserInputType == Enum.UserInputType.Touch
-						or input.UserInputType == Enum.UserInputType.MouseMovement
-					)
+					and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement)
 				then
 					local delta = input.Position - dragStartCheck
 					if math.abs(delta.X) > 5 or math.abs(delta.Y) > 5 then
@@ -3821,10 +3710,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			end))
 
 			_trackConnection(Checkbox.InputEnded:Connect(function(input)
-				if
-					input.UserInputType == Enum.UserInputType.Touch
-					or input.UserInputType == Enum.UserInputType.MouseButton1
-				then
+				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 					if isDragCheck and activeCheckInput == input then
 						isDragCheck = false
 						activeCheckInput = nil
@@ -4174,8 +4060,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 						OptBtn.BackgroundTransparency = 1
 						OptBtn.TextTransparency = 1
 
-						local fadeInTween =
-							TweenInfo.new(0.26, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0, false, i * 0.03)
+						local fadeInTween = TweenInfo.new(0.26, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0, false, i * 0.03)
 						local tween = TweenService:Create(OptBtn, fadeInTween, {
 							BackgroundTransparency = 1,
 							TextTransparency = 0,
@@ -4272,8 +4157,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 									Selected.Text = FormatDisplayText(opt)
 									Selected.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-									local displayTweenInfo =
-										TweenInfo.new(0.38, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+									local displayTweenInfo = TweenInfo.new(0.38, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 									local displayTween = TweenService:Create(Selected, displayTweenInfo, {
 										TextTransparency = 0,
 									})
@@ -4283,10 +4167,8 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 									for _, btn in ipairs(OptionsHolder:GetChildren()) do
 										if btn:IsA("TextButton") then
 											local btnHighlightBar = btn:FindFirstChild("Frame")
-											local tweenInfo =
-												TweenInfo.new(0.26, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-											local colorTween =
-												TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+											local tweenInfo = TweenInfo.new(0.26, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+											local colorTween = TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 
 											if btn.Text == tostring(opt) then
 												local tween1 = TweenService:Create(btn, colorTween, {
@@ -4661,10 +4543,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			end
 
 			_trackConnection(SliderButton.InputBegan:Connect(function(input)
-				if
-					input.UserInputType == Enum.UserInputType.Touch
-					or input.UserInputType == Enum.UserInputType.MouseButton1
-				then
+				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 					if Solace.CurrentActiveSlider and Solace.CurrentActiveSlider ~= Slider then
 						return
 					end
@@ -4678,8 +4557,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 
 					for _, sliderElement in ipairs(Solace.SliderElements) do
 						if sliderElement ~= Slider then
-							local otherSliderButton = sliderElement:FindFirstChild("Bar")
-								and sliderElement.Bar:FindFirstChild("TextButton")
+							local otherSliderButton = sliderElement:FindFirstChild("Bar") and sliderElement.Bar:FindFirstChild("TextButton")
 							if otherSliderButton then
 								otherSliderButton.Active = false
 							end
@@ -4707,20 +4585,14 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			_trackConnection(UserInputService.InputChanged:Connect(function(input)
 				if
 					isDraggingSlider
-					and (
-						input.UserInputType == Enum.UserInputType.MouseMovement
-						or input.UserInputType == Enum.UserInputType.Touch
-					)
+					and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch)
 				then
 					UpdateSlider(input.Position.X)
 				end
 			end))
 
 			_trackConnection(UserInputService.InputEnded:Connect(function(input)
-				if
-					input.UserInputType == Enum.UserInputType.Touch
-					or input.UserInputType == Enum.UserInputType.MouseButton1
-				then
+				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 					if isDraggingSlider then
 						isDraggingSlider = false
 						Solace.CurrentActiveSlider = nil
@@ -4730,8 +4602,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 						end
 
 						for _, sliderElement in ipairs(Solace.SliderElements) do
-							local otherSliderButton = sliderElement:FindFirstChild("Bar")
-								and sliderElement.Bar:FindFirstChild("TextButton")
+							local otherSliderButton = sliderElement:FindFirstChild("Bar") and sliderElement.Bar:FindFirstChild("TextButton")
 							if otherSliderButton then
 								otherSliderButton.Active = true
 							end
@@ -4959,8 +4830,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 				local _, decimalCount = string.gsub(filtered, "%.", "")
 				if decimalCount > 1 then
 					local firstDecimal = string.find(filtered, "%.")
-					filtered = string.sub(filtered, 1, firstDecimal)
-						.. string.gsub(string.sub(filtered, firstDecimal + 1), "%.", "")
+					filtered = string.sub(filtered, 1, firstDecimal) .. string.gsub(string.sub(filtered, firstDecimal + 1), "%.", "")
 				end
 
 				if string.find(filtered, "%-") then
@@ -5033,10 +4903,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			end
 
 			_trackConnection(TextBox.InputBegan:Connect(function(input)
-				if
-					input.UserInputType == Enum.UserInputType.Touch
-					or input.UserInputType == Enum.UserInputType.MouseButton1
-				then
+				if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 					TextBox:CaptureFocus()
 				end
 			end))
@@ -5307,7 +5174,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 				end
 				IsListening = true
 				KeyLabel.Text = "..."
-KeyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+				KeyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 				ListeningConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
 					if not IsListening then
@@ -5387,8 +5254,7 @@ KeyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 				elseif CurrentKey == "MouseButton3" then
 					return input.UserInputType == Enum.UserInputType.MouseButton3
 				else
-					return input.UserInputType == Enum.UserInputType.Keyboard
-						and input.KeyCode.Name == CurrentKey
+					return input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode.Name == CurrentKey
 				end
 			end
 
@@ -5576,11 +5442,10 @@ KeyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 					if useGradient then
 						Solace.Instance("UIGradient", {
 							Parent = SectionIcon,
-							Color = config.IconGradient.Color
-								or ColorSequence.new({
-									ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-									ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 255)),
-								}),
+							Color = config.IconGradient.Color or ColorSequence.new({
+								ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+								ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 255)),
+							}),
 							Rotation = config.IconGradient.Rotation or 0,
 						})
 					end
@@ -5809,11 +5674,7 @@ KeyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 					end
 
 					if not configExists then
-						print(
-							"Cannot overwrite: Config '"
-								.. Solace.CurrentConfig
-								.. "' does not exist. Use 'Create Config' instead"
-						)
+						print("Cannot overwrite: Config '" .. Solace.CurrentConfig .. "' does not exist. Use 'Create Config' instead")
 						return
 					end
 
@@ -5932,12 +5793,7 @@ KeyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 					end
 
 					if not saveSuccess then
-						print(
-							"Auto load set to '"
-								.. Solace.CurrentConfig
-								.. "' but could not save: "
-								.. tostring(saveResult)
-						)
+						print("Auto load set to '" .. Solace.CurrentConfig .. "' but could not save: " .. tostring(saveResult))
 					end
 				end,
 			})
