@@ -1500,6 +1500,365 @@ function Solace.RemoveNotification(notificationId)
 	Solace.RepositionNotifications()
 end
 
+local function getInterfaceParent()
+	if RunService:IsStudio() then
+		return LocalPlayer:FindFirstChild("PlayerGui") or LocalPlayer.PlayerGui
+	elseif gethui then
+		return gethui()
+	elseif CoreGui then
+		return CoreGui
+	end
+	return LocalPlayer:FindFirstChild("PlayerGui") or LocalPlayer.PlayerGui
+end
+
+local function getKeyRequest()
+	return request or http_request or (syn and syn.request) or (fluxus and fluxus.request)
+end
+
+local function keySha256(value)
+	local cryptLibrary = crypt or (syn and syn.crypt)
+	if cryptLibrary and cryptLibrary.hash then
+		local ok, result = pcall(cryptLibrary.hash, tostring(value))
+		if ok and result then
+			return result
+		end
+	end
+	local bit = bit32
+	if not bit then
+		return tostring(value)
+	end
+	local constants = {
+		0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+		0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+		0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+		0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+		0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+		0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+		0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+		0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
+	}
+	local words = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19}
+	local data = tostring(value) .. string.char(128)
+	while (#data + 8) % 64 ~= 0 do
+		data ..= string.char(0)
+	end
+	local length = #tostring(value) * 8
+	for shift = 56, 0, -8 do
+		data ..= string.char(bit.band(bit.rshift(length, shift), 255))
+	end
+	for offset = 1, #data, 64 do
+		local schedule = {}
+		for index = 0, 15 do
+			local position = offset + index * 4
+			schedule[index] = bit.bor(bit.lshift(string.byte(data, position), 24), bit.lshift(string.byte(data, position + 1), 16), bit.lshift(string.byte(data, position + 2), 8), string.byte(data, position + 3))
+		end
+		for index = 16, 63 do
+			local a = schedule[index - 15]
+			local b = schedule[index - 2]
+			local s0 = bit.bxor(bit.rrotate(a, 7), bit.rrotate(a, 18), bit.rshift(a, 3))
+			local s1 = bit.bxor(bit.rrotate(b, 17), bit.rrotate(b, 19), bit.rshift(b, 10))
+			schedule[index] = (schedule[index - 16] + s0 + schedule[index - 7] + s1) % 4294967296
+		end
+		local a, b, c, d, e, f, g, h = table.unpack(words)
+		for index = 0, 63 do
+			local s1 = bit.bxor(bit.rrotate(e, 6), bit.rrotate(e, 11), bit.rrotate(e, 25))
+			local choose = bit.bxor(bit.band(e, f), bit.band(bit.bnot(e), g))
+			local temp1 = (h + s1 + choose + constants[index + 1] + schedule[index]) % 4294967296
+			local s0 = bit.bxor(bit.rrotate(a, 2), bit.rrotate(a, 13), bit.rrotate(a, 22))
+			local majority = bit.bxor(bit.band(a, b), bit.band(a, c), bit.band(b, c))
+			local temp2 = (s0 + majority) % 4294967296
+			h, g, f, e, d, c, b, a = g, f, e, (d + temp1) % 4294967296, c, b, a, (temp1 + temp2) % 4294967296
+		end
+		words[1] = (words[1] + a) % 4294967296
+		words[2] = (words[2] + b) % 4294967296
+		words[3] = (words[3] + c) % 4294967296
+		words[4] = (words[4] + d) % 4294967296
+		words[5] = (words[5] + e) % 4294967296
+		words[6] = (words[6] + f) % 4294967296
+		words[7] = (words[7] + g) % 4294967296
+		words[8] = (words[8] + h) % 4294967296
+	end
+	return string.format("%08x%08x%08x%08x%08x%08x%08x%08x", table.unpack(words))
+end
+
+local function createPlatoboostProvider(provider)
+	local requestFunction = getKeyRequest()
+	local serviceId = tostring(provider.ServiceId or provider.Service or "")
+	local secret = tostring(provider.Secret or "")
+	local identifier = keySha256(tostring(provider.Identifier or LocalPlayer.UserId))
+	local host = provider.Host or "https://api.platoboost.app"
+	local cachedLink = nil
+	local cachedAt = 0
+	local busy = false
+	local function call(options)
+		if not requestFunction then
+			return nil, "This executor does not support HTTP requests."
+		end
+		local ok, response = pcall(requestFunction, options)
+		if not ok or type(response) ~= "table" then
+			return nil, "Could not connect to the key service."
+		end
+		local status = response.StatusCode or response.status_code
+		local body = response.Body or response.body or ""
+		local decoded = nil
+		if body ~= "" then
+			pcall(function()
+				decoded = HttpService:JSONDecode(body)
+			end)
+		end
+		return { Status = status, Data = decoded }, nil
+	end
+	local function nonce()
+		local result = ""
+		for _ = 1, 16 do
+			result ..= string.char(math.random(97, 122))
+		end
+		return result
+	end
+	local function integrity(data, value)
+		return not secret or secret == "" or data == keySha256(value)
+	end
+	local function getLink()
+		if cachedLink and cachedAt + 600 > os.time() then
+			return true, cachedLink
+		end
+		local response, errorMessage = call({
+			Url = host .. "/public/start",
+			Method = "POST",
+			Headers = { ["Content-Type"] = "application/json" },
+			Body = HttpService:JSONEncode({ service = serviceId, identifier = identifier }),
+		})
+		if not response then
+			return false, errorMessage
+		end
+		if response.Status == 200 and response.Data and response.Data.success and response.Data.data then
+			cachedLink = response.Data.data.url
+			cachedAt = os.time()
+			return true, cachedLink
+		end
+		return false, response.Status == 429 and "The service rate-limited the requests. Please wait a few seconds." or (response.Data and response.Data.message) or "Could not generate the key link."
+	end
+	local function verify(key)
+		if busy then
+			return false, "Aguarde a validação anterior terminar."
+		end
+		busy = true
+		local currentNonce = nonce()
+		local url = host .. "/public/whitelist/" .. serviceId .. "?identifier=" .. identifier .. "&key=" .. HttpService:UrlEncode(key) .. "&nonce=" .. currentNonce
+		local response, errorMessage = call({ Url = url, Method = "GET" })
+		busy = false
+		if not response then
+			return false, errorMessage
+		end
+		if response.Status ~= 200 or not response.Data or not response.Data.success then
+			return false, response.Data and response.Data.message or "Invalid response from the key service."
+		end
+		local data = response.Data.data or {}
+		if data.valid and integrity(data.hash, "true-" .. currentNonce .. "-" .. secret) then
+			return true, "Key validated."
+		end
+		if not data.valid and string.sub(key, 1, 4) == "KEY_" then
+			local redeemNonce = nonce()
+			local redeemResponse, redeemError = call({
+				Url = host .. "/public/redeem/" .. serviceId,
+				Method = "POST",
+				Headers = { ["Content-Type"] = "application/json" },
+				Body = HttpService:JSONEncode({ identifier = identifier, key = key, nonce = redeemNonce }),
+			})
+			if redeemResponse and redeemResponse.Status == 200 and redeemResponse.Data and redeemResponse.Data.success and redeemResponse.Data.data and redeemResponse.Data.data.valid and integrity(redeemResponse.Data.data.hash, "true-" .. redeemNonce .. "-" .. secret) then
+				return true, "Key redeemed and validated."
+			end
+			return false, redeemError or (redeemResponse and redeemResponse.Data and redeemResponse.Data.message) or "Could not redeem this key."
+		end
+		return false, "Invalid key."
+	end
+	return { Verify = verify, Copy = function()
+		local success, link = getLink()
+		if success and setclipboard then
+			pcall(setclipboard, link)
+		end
+		return success, link
+	end }
+end
+
+local function resolveKeyProviders(keyConfig)
+	local entries = keyConfig.Providers or keyConfig.API or {}
+	if keyConfig.Provider then
+		entries = { keyConfig.Provider }
+	end
+	if entries.Type then
+		entries = { entries }
+	end
+	local providers = {}
+	for _, provider in ipairs(entries) do
+		if type(provider) == "table" then
+			local providerType = string.lower(tostring(provider.Type or provider.Name or ""))
+			if providerType == "platoboost" then
+				table.insert(providers, createPlatoboostProvider(provider))
+			elseif type(provider.Verify) == "function" then
+				table.insert(providers, provider)
+			end
+		end
+	end
+	return providers
+end
+
+function Solace.RegisterKeyProvider(name, factory)
+	if type(name) == "string" and type(factory) == "function" then
+		Solace.KeyProviders = Solace.KeyProviders or {}
+		Solace.KeyProviders[string.lower(name)] = factory
+		return true
+	end
+	return false
+end
+
+function Solace.ValidateKeySystem(keyConfig)
+	if type(keyConfig) ~= "table" or keyConfig.Enabled == false then
+		return true
+	end
+	Solace.AuthState = "Validating"
+	local providers = resolveKeyProviders(keyConfig)
+	local savedFolder = keyConfig.Folder or Solace.ConfigFolder .. "/Keys"
+	safeEnsureFolder(Solace.ConfigFolder)
+	safeEnsureFolder(savedFolder)
+	local keyPath = savedFolder .. "/" .. tostring(LocalPlayer.UserId) .. ".key"
+	local function validate(key)
+		key = tostring(key or "")
+		if key == "" then
+			return false, "Enter a key to continue."
+		end
+		if type(keyConfig.KeyValidator) == "function" then
+			local ok, valid, message = pcall(keyConfig.KeyValidator, key)
+			return ok and valid == true, ok and (message or "Invalid key.") or tostring(valid)
+		end
+		if #providers > 0 then
+			local lastMessage = "Invalid key."
+			for _, provider in ipairs(providers) do
+				local ok, valid, message = pcall(provider.Verify, key)
+				if ok and valid then
+					return true, message or "Key validated."
+				end
+				lastMessage = ok and (message or lastMessage) or tostring(valid)
+			end
+			return false, lastMessage
+		end
+		local configured = keyConfig.Key
+		if type(configured) == "table" then
+			for _, value in ipairs(configured) do
+				if tostring(value) == key then
+					return true, "Key validated."
+				end
+			end
+		elseif configured ~= nil and tostring(configured) == key then
+			return true, "Key validated."
+		else
+			return false, "No validation method has been configured."
+		end
+		return false, "Invalid key."
+	end
+	if keyConfig.SaveKey then
+		local savedKey = safeReadFile(keyPath)
+		if savedKey then
+			local valid = validate(savedKey)
+			if valid then
+				Solace.AuthState = "Authorized"
+				return true
+			end
+			safeDeleteFile(keyPath)
+		end
+	end
+	local parent = getInterfaceParent()
+	local keyGui = Solace.Instance("ScreenGui", {
+		Name = "SolaceKeySystem",
+		Parent = parent,
+		ResetOnSpawn = false,
+		IgnoreGuiInset = true,
+		ZIndexBehavior = Enum.ZIndexBehavior.Global,
+	})
+	local overlay = Solace.Instance("Frame", {
+		Parent = keyGui,
+		Size = UDim2.fromScale(1, 1),
+		BackgroundColor3 = Solace.MainFrameColor,
+		BackgroundTransparency = Solace.UITransparency,
+		BorderSizePixel = 0,
+	})
+	local panel = Solace.Instance("Frame", {
+		Parent = overlay,
+		Size = UDim2.new(0, 420, 0, 260),
+		Position = UDim2.fromScale(0.5, 0.5),
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = Solace.FrameColor,
+		BackgroundTransparency = Solace.FrameTransparency,
+		BorderSizePixel = 0,
+	})
+	Solace.Instance("UICorner", { Parent = panel, CornerRadius = UDim.new(0, 10) })
+	Solace.Instance("UIPadding", { Parent = panel, PaddingTop = UDim.new(0, 22), PaddingBottom = UDim.new(0, 22), PaddingLeft = UDim.new(0, 22), PaddingRight = UDim.new(0, 22) })
+	local layout = Solace.Instance("UIListLayout", { Parent = panel, Padding = UDim.new(0, 12), HorizontalAlignment = Enum.HorizontalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder })
+	local title = Solace.Instance("TextLabel", { Parent = panel, Size = UDim2.new(1, 0, 0, 28), BackgroundTransparency = 1, FontFace = Solace.CustomFontBold, Text = keyConfig.Title or "Key System", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 21, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 1 })
+	local note = Solace.Instance("TextLabel", { Parent = panel, Size = UDim2.new(1, 0, 0, 42), BackgroundTransparency = 1, FontFace = Solace.CustomFont, Text = keyConfig.Note or "Enter your key to continue.", TextColor3 = Color3.fromRGB(185, 185, 185), TextSize = 14, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 2 })
+	local input = Solace.Instance("TextBox", { Parent = panel, Size = UDim2.new(1, 0, 0, 38), BackgroundColor3 = Solace.MainFrameColor, BackgroundTransparency = Solace.FrameTransparency, BorderSizePixel = 0, ClearTextOnFocus = false, FontFace = Solace.CustomFont, PlaceholderText = "Enter your key", PlaceholderColor3 = Color3.fromRGB(140, 140, 140), Text = "", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 14, LayoutOrder = 3 })
+	Solace.Instance("UICorner", { Parent = input, CornerRadius = UDim.new(0, 7) })
+	Solace.Instance("UIPadding", { Parent = input, PaddingLeft = UDim.new(0, 12), PaddingRight = UDim.new(0, 12) })
+	local status = Solace.Instance("TextLabel", { Parent = panel, Size = UDim2.new(1, 0, 0, 28), BackgroundTransparency = 1, FontFace = Solace.CustomFont, Text = "", TextColor3 = Color3.fromRGB(255, 130, 130), TextSize = 13, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 4 })
+	local actions = Solace.Instance("Frame", { Parent = panel, Size = UDim2.new(1, 0, 0, 36), BackgroundTransparency = 1, LayoutOrder = 5 })
+	local getButton = Solace.Instance("TextButton", { Parent = actions, Size = UDim2.new(0.48, 0, 1, 0), BackgroundColor3 = Solace.FrameColor, BackgroundTransparency = Solace.FrameTransparency, BorderSizePixel = 0, FontFace = Solace.CustomFont, Text = "Get key", TextColor3 = Color3.fromRGB(230, 230, 230), TextSize = 14, AutoButtonColor = true })
+	local submit = Solace.Instance("TextButton", { Parent = actions, Size = UDim2.new(0.48, 0, 1, 0), Position = UDim2.new(0.52, 0, 0, 0), BackgroundColor3 = Solace.AccentColor, BackgroundTransparency = 0, BorderSizePixel = 0, FontFace = Solace.CustomFontBold, Text = "Validate", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 14, AutoButtonColor = true })
+	Solace.Instance("UICorner", { Parent = getButton, CornerRadius = UDim.new(0, 7) })
+	Solace.Instance("UICorner", { Parent = submit, CornerRadius = UDim.new(0, 7) })
+	local accepted = false
+	local validating = false
+	_trackConnection(getButton.MouseButton1Click:Connect(function()
+		for _, provider in ipairs(providers) do
+			if provider.Copy then
+				local ok, result = pcall(provider.Copy)
+				if ok and result then
+					status.TextColor3 = Color3.fromRGB(140, 220, 160)
+					status.Text = "Key link copied to clipboard."
+					return
+				end
+			end
+		end
+		if keyConfig.URL and setclipboard then
+			pcall(setclipboard, keyConfig.URL)
+			status.TextColor3 = Color3.fromRGB(140, 220, 160)
+			status.Text = "Key link copied to clipboard."
+		else
+			status.Text = "No key link has been configured."
+		end
+	end))
+	_trackConnection(submit.MouseButton1Click:Connect(function()
+		if validating then
+			return
+		end
+		validating = true
+		status.TextColor3 = Color3.fromRGB(185, 185, 185)
+		status.Text = "Validating..."
+		local valid, message = validate(input.Text)
+		if valid then
+			accepted = true
+			if keyConfig.SaveKey then
+				safeWriteFile(keyPath, tostring(input.Text))
+			end
+			status.TextColor3 = Color3.fromRGB(140, 220, 160)
+			status.Text = message or "Key validated."
+		else
+			status.TextColor3 = Color3.fromRGB(255, 130, 130)
+			status.Text = message or "Invalid key."
+		end
+		validating = false
+	end))
+	while keyGui.Parent and not accepted and not _isDestroyed do
+		task.wait()
+	end
+	if keyGui and keyGui.Parent then
+		keyGui:Destroy()
+	end
+	if accepted then
+		Solace.AuthState = "Authorized"
+	end
+	return accepted
+end
+
 function Solace:Notify(config)
 	local parent
 	if RunService:IsStudio() then
@@ -1706,6 +2065,7 @@ end
 Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 	_isDestroyed = false
 	Solace.Debug.StartTime = tick()
+	Solace.AuthState = "Pending"
 
 	if config.ConfigFolder then
 		Solace.ConfigFolder = config.ConfigFolder
@@ -1736,6 +2096,13 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 	Solace.LoadResizeSettings()
 	Solace.LoadUITransparencySettings()
 	Solace.LoadUIScaleSettings()
+
+	local keyAuthorized = Solace.ValidateKeySystem(config.KeySystem)
+	if not keyAuthorized then
+		Solace.Destroy()
+		return nil
+	end
+	Solace.AuthState = "Authorized"
 
 	local parent
 	if RunService:IsStudio() then
