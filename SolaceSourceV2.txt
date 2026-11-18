@@ -1787,6 +1787,7 @@ function Solace.ValidateKeySystem(keyConfig)
 		BackgroundColor3 = Solace.MainFrameColor,
 		BackgroundTransparency = 0.08,
 		BorderSizePixel = 0,
+		Active = true,
 	})
 	Solace.Instance("UICorner", { Parent = panel, CornerRadius = UDim.new(0, 10) })
 	Solace.Instance("UIPadding", { Parent = panel, PaddingTop = UDim.new(0, 22), PaddingBottom = UDim.new(0, 22), PaddingLeft = UDim.new(0, 22), PaddingRight = UDim.new(0, 22) })
@@ -1858,6 +1859,43 @@ function Solace.ValidateKeySystem(keyConfig)
 	Solace.Instance("UICorner", { Parent = submit, CornerRadius = UDim.new(0, 7) })
 	local accepted = false
 	local validating = false
+	local isDraggingKey = false
+	local dragInputKey = nil
+	local dragStartKey = nil
+	local startPosKey = nil
+	local keyDragConnections = {}
+	local function trackKeyDrag(c)
+		table.insert(keyDragConnections, c)
+		return _trackConnection(c)
+	end
+	trackKeyDrag(panel.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			isDraggingKey = true
+			dragInputKey = input
+			dragStartKey = input.Position
+			startPosKey = panel.Position
+		end
+	end))
+	trackKeyDrag(UserInputService.InputChanged:Connect(function(input)
+		if
+			isDraggingKey
+			and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch)
+		then
+			local delta = input.Position - dragStartKey
+			panel.Position = UDim2.new(
+				startPosKey.X.Scale,
+				startPosKey.X.Offset + delta.X,
+				startPosKey.Y.Scale,
+				startPosKey.Y.Offset + delta.Y
+			)
+		end
+	end))
+	trackKeyDrag(UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			isDraggingKey = false
+			dragInputKey = nil
+		end
+	end))
 	_trackConnection(getButton.MouseButton1Click:Connect(function()
 		for _, provider in ipairs(providers) do
 			if provider.Copy then
@@ -1900,6 +1938,11 @@ function Solace.ValidateKeySystem(keyConfig)
 	end))
 	while keyGui.Parent and not accepted and not _isDestroyed do
 		task.wait()
+	end
+	for _, c in ipairs(keyDragConnections) do
+		if c and c.Connected then
+			c:Disconnect()
+		end
 	end
 	if keyGui and keyGui.Parent then
 		keyGui:Destroy()
