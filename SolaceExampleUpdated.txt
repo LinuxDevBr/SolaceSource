@@ -25,6 +25,7 @@ local UI = Solace.Create({
 	AccentColor = Color3.fromRGB(0, 120, 212),
 	KeySystem = {
 		Enabled = true,
+		Title = "Solace Access",
 		Key = {
 			"1234",
 			"5678",
