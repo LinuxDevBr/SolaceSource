@@ -1009,11 +1009,24 @@ Solace.SaveExclusions = {}
 Solace.SavedConfigs = {}
 Solace.CurrentConfig = ""
 Solace.ConfigFolder = "Solace"
+Solace.ConfigSchemaVersion = 2
 Solace.AutoLoadEnabled = false
 Solace.AutoLoadConfig = ""
 Solace.PrivacyEnabled = false
 
 Solace.SaveableElements = {}
+Solace.UI = nil
+
+local function resolveElementId(config)
+	if not config then
+		return nil
+	end
+	local id = config.Id or config.Flag
+	if id == nil or id == "" then
+		return nil
+	end
+	return tostring(id)
+end
 
 Solace.BackgroundImage = nil
 Solace.BackgroundSettings = {
@@ -1226,7 +1239,7 @@ function Solace.LoadUITransparencySettings()
 			return
 		end
 		local data = HttpService:JSONDecode(json)
-		Solace.UITransparency = data.Transparency or 0.6
+		Solace.UITransparency = data.Transparency ~= nil and data.Transparency or 0.05
 	end)
 	if not ok then
 		print("Error loading UI transparency settings:", err)
@@ -1276,6 +1289,7 @@ function Solace.SaveConfig(name)
 	local configData = {
 		Elements = {},
 		ConfigName = name,
+		SchemaVersion = Solace.ConfigSchemaVersion,
 		SaveTime = os.time(),
 	}
 
@@ -1288,6 +1302,7 @@ function Solace.SaveConfig(name)
 				Type = element.Type,
 				Name = element.Name,
 				TabName = elementData.TabName,
+				ElementId = element.Id,
 				Value = value,
 			}
 
@@ -1328,16 +1343,24 @@ function Solace.LoadConfig(name)
 		print("Failed to parse config '" .. name .. "'")
 		return false, "Invalid configuration file format"
 	end
+	local schemaVersion = tonumber(configData.SchemaVersion) or 1
+	if schemaVersion > Solace.ConfigSchemaVersion then
+		print("Failed to load config '" .. name .. "': unsupported schema version " .. tostring(schemaVersion))
+		return false, "Configuration schema is newer than this UI"
+	end
 
 	local loadedCount = 0
 	for _, elementInfo in ipairs(configData.Elements) do
 		for _, elementData in ipairs(Solace.SaveableElements or {}) do
 			local element = elementData.Element
-			if
-				element.Type == elementInfo.Type
-				and element.Name == elementInfo.Name
-				and elementData.TabName == elementInfo.TabName
-			then
+			local hasElementId = elementInfo.ElementId ~= nil and elementInfo.ElementId ~= ""
+			local matchesElement = hasElementId and element.Id ~= nil and tostring(element.Id) == tostring(elementInfo.ElementId)
+				or (
+					element.Type == elementInfo.Type
+					and element.Name == elementInfo.Name
+					and elementData.TabName == elementInfo.TabName
+				)
+			if matchesElement then
 				if not elementData.IsAutoLoadInput then
 					if
 						element.Type == "Toggle"
@@ -1641,6 +1664,10 @@ function Solace:Notify(config)
 end
 
 function Solace.Destroy()
+	if _isDestroyed then
+		return
+	end
+	_isDestroyed = true
 	local interfaceName = "IsRunning"
 	getgenv()[interfaceName] = nil
 	_G[interfaceName] = nil
@@ -1648,7 +1675,6 @@ function Solace.Destroy()
 	Solace.SaveResizeSettings()
 	Solace.SaveUITransparencySettings()
 	Solace.SaveUIScaleSettings()
-	_isDestroyed = true
 	for _, c in ipairs(_connections) do
 		if c and c.Connected then
 			c:Disconnect()
@@ -1671,9 +1697,14 @@ function Solace.Destroy()
 	Solace.ActiveNotifications = {}
 	Solace.SliderElements = {}
 	Solace.SaveableElements = {}
+	if Solace.UI and Solace.UI.Parent then
+		Solace.UI:Destroy()
+	end
+	Solace.UI = nil
 end
 
 Solace.Create = LPH_NO_VIRTUALIZE(function(config)
+	_isDestroyed = false
 	Solace.Debug.StartTime = tick()
 
 	if config.ConfigFolder then
@@ -1726,6 +1757,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 		IgnoreGuiInset = true,
 	})
+	Solace.UI = SolaceUI
 
 	local checkcallerSupported = (checkcaller ~= nil)
 	local clonerefSupported = (cloneref ~= nil) or (clonereference ~= nil)
@@ -3395,6 +3427,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			local element = {
 				Type = "Toggle",
 				Name = config.Name,
+				Id = resolveElementId(config),
 				Instance = Toggle,
 				State = State,
 				Value = State,
@@ -3727,6 +3760,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			local element = {
 				Type = "Checkbox",
 				Name = config.Name,
+				Id = resolveElementId(config),
 				Instance = Checkbox,
 				State = State,
 				Value = State,
@@ -4307,6 +4341,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			local element = {
 				Type = "Dropdown",
 				Name = config.Name,
+				Id = resolveElementId(config),
 				Instance = Dropdown,
 				Value = IsMulti and SelectedValues or SelectedValue,
 			}
@@ -4649,6 +4684,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			local element = {
 				Type = "Slider",
 				Name = config.Name,
+				Id = resolveElementId(config),
 				Instance = Slider,
 				Value = Value,
 			}
@@ -4954,6 +4990,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			local element = {
 				Type = "Input",
 				Name = config.Name,
+				Id = resolveElementId(config),
 				Instance = Input,
 				Value = TextBox.Text,
 			}
@@ -5310,6 +5347,7 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 			local element = {
 				Type = "Keybind",
 				Name = config.Name,
+				Id = resolveElementId(config),
 				Instance = KeybindFrame,
 				Value = CurrentKey,
 			}
@@ -5958,7 +5996,6 @@ Solace.Create = LPH_NO_VIRTUALIZE(function(config)
 
 	function SolaceLib.Destroy()
 		Solace.Destroy()
-		SolaceUI:Destroy()
 	end
 
 	return SolaceLib
